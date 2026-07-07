@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 
 export default function StudentList() {
   const [students, setStudents] = useState([]);
+  const [teachers, setTeachers] = useState([]);
   const [groups, setGroups] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [userType, setUserType] = useState("student");
   const [toast, setToast] = useState(null);
   const [formData, setFormData] = useState({
     fullName: "",
@@ -21,7 +23,10 @@ export default function StudentList() {
     // Ma'lumotlarni yuklash
     fetch("https://667bcc2968d178a8.mokky.dev/users")
       .then((res) => res.json())
-      .then((data) => setStudents(data.filter((u) => u.role === "student")));
+      .then((data) => {
+        setStudents(data.filter((u) => u.role === "student"));
+        setTeachers(data.filter((u) => u.role === "teacher"));
+      });
     fetch("https://667bcc2968d178a8.mokky.dev/lessons")
       .then((res) => res.json())
       .then((data) => setGroups(data));
@@ -32,15 +37,20 @@ export default function StudentList() {
     const res = await fetch("https://667bcc2968d178a8.mokky.dev/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...formData, role: "student" }),
+      body: JSON.stringify({ ...formData, role: userType }),
     });
 
     if (res.ok) {
       const added = await res.json();
-      setStudents([...students, added]);
+      if (userType === "student") {
+        setStudents([...students, added]);
+        showToast("Talaba muvaffaqiyatli qo'shildi!");
+      } else {
+        setTeachers([...teachers, added]);
+        showToast("O'qituvchi muvaffaqiyatli qo'shildi!");
+      }
       setIsOpen(false);
       setFormData({ fullName: "", email: "", password: "", groupId: "" });
-      showToast("Talaba muvaffaqiyatli qo'shildi!");
     }
   };
 
@@ -48,8 +58,13 @@ export default function StudentList() {
     await fetch(`https://667bcc2968d178a8.mokky.dev/users/${id}`, {
       method: "DELETE",
     });
-    setStudents(students.filter((s) => s.id !== id));
-    showToast("Talaba o'chirildi!");
+    if (userType === "student") {
+      setStudents(students.filter((s) => s.id !== id));
+      showToast("Talaba o'chirildi!");
+    } else {
+      setTeachers(teachers.filter((t) => t.id !== id));
+      showToast("O'qituvchi o'chirildi!");
+    }
   };
 
   return (
@@ -60,14 +75,44 @@ export default function StudentList() {
         </div>
       )}
 
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-gray-800">Talabalar ro'yxati</h1>
-        <button
-          onClick={() => setIsOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition"
-        >
-          + Yangi o'quvchi qo'shish
-        </button>
+      {/* Header va Tablar */}
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-800">Foydalanuvchilar</h1>
+          <button
+            onClick={() => {
+              setIsOpen(true);
+              setUserType("student");
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition"
+          >
+            + Yangi qo'shish
+          </button>
+        </div>
+
+        {/* Tab Buttons */}
+        <div className="flex gap-4 border-b border-gray-200">
+          <button
+            onClick={() => setUserType("student")}
+            className={`px-6 py-3 font-semibold transition-colors ${
+              userType === "student"
+                ? "text-blue-600 border-b-2 border-blue-600"
+                : "text-gray-600 hover:text-gray-800"
+            }`}
+          >
+            👥 Talabalar ({students.length})
+          </button>
+          <button
+            onClick={() => setUserType("teacher")}
+            className={`px-6 py-3 font-semibold transition-colors ${
+              userType === "teacher"
+                ? "text-blue-600 border-b-2 border-blue-600"
+                : "text-gray-600 hover:text-gray-800"
+            }`}
+          >
+            👨‍🏫 O'qituvchilar ({teachers.length})
+          </button>
+        </div>
       </div>
 
       {/* Jadval ko'rinishida ro'yxat */}
@@ -77,24 +122,26 @@ export default function StudentList() {
             <tr>
               <th className="p-4">Ism Familiya</th>
               <th className="p-4">Email</th>
-              <th className="p-4">Guruh</th>
+              {userType === "student" && <th className="p-4">Guruh</th>}
               <th className="p-4 text-center">Amallar</th>
             </tr>
           </thead>
           <tbody>
-            {students.map((s) => (
+            {(userType === "student" ? students : teachers).map((u) => (
               <tr
-                key={s.id}
+                key={u.id}
                 className="border-b border-gray-50 hover:bg-gray-50 transition"
               >
-                <td className="p-4 font-medium">{s.fullName}</td>
-                <td className="p-4 text-gray-600">{s.email}</td>
-                <td className="p-4 text-gray-600">
-                  {groups.find((g) => g.id == s.groupId)?.title || "Guruhsiz"}
-                </td>
+                <td className="p-4 font-medium">{u.fullName}</td>
+                <td className="p-4 text-gray-600">{u.email}</td>
+                {userType === "student" && (
+                  <td className="p-4 text-gray-600">
+                    {groups.find((g) => g.id == u.groupId)?.title || "Guruhsiz"}
+                  </td>
+                )}
                 <td className="p-4 text-center">
                   <button
-                    onClick={() => deleteStudent(s.id)}
+                    onClick={() => deleteStudent(u.id)}
                     className="text-red-500 hover:text-red-700 font-semibold text-sm"
                   >
                     O'chirish
@@ -106,12 +153,14 @@ export default function StudentList() {
         </table>
       </div>
 
-      {/* Modal oyna (oldingi kod qoladi) */}
+      {/* Modal oyna */}
       {isOpen && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-40">
           <div className="bg-white p-8 rounded-2xl shadow-2xl w-96 transform transition-all">
             <h2 className="text-2xl font-bold mb-6 text-gray-800">
-              Yangi o'quvchi
+              {userType === "student"
+                ? "Yangi Talaba Qo'shish"
+                : "Yangi O'qituvchi Qo'shish"}
             </h2>
             <form onSubmit={handleAddStudent} className="space-y-4">
               <input
@@ -140,19 +189,21 @@ export default function StudentList() {
                 }
                 required
               />
-              <select
-                className="w-full border-gray-300 border p-3 rounded-lg outline-none"
-                onChange={(e) =>
-                  setFormData({ ...formData, groupId: e.target.value })
-                }
-              >
-                <option value="">Guruhni tanlang</option>
-                {groups.map((g) => (
-                  <option key={g.id} value={g.id}>
-                    {g.title}
-                  </option>
-                ))}
-              </select>
+              {userType === "student" && (
+                <select
+                  className="w-full border-gray-300 border p-3 rounded-lg outline-none"
+                  onChange={(e) =>
+                    setFormData({ ...formData, groupId: e.target.value })
+                  }
+                >
+                  <option value="">Guruhni tanlang (ixtiyoriy)</option>
+                  {groups.map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.title}
+                    </option>
+                  ))}
+                </select>
+              )}
               <div className="flex gap-3 mt-6">
                 <button
                   type="submit"

@@ -25,13 +25,18 @@ export default function Sidebar({ role }) {
     { label: "📚 Kurslar", href: "/courses", roles: ["admin"] },
     { label: "👥 Talabalar", href: "/students", roles: ["admin"] },
     {
-      label: "👨‍🏫 Mening Guruhlarim",
-      href: "/teacher-groups",
+      label: "👨‍🏫 Mening Kurslarim",
+      href: "/teacher-courses",
       roles: ["teacher"],
     },
     { label: "📅 Mening Darslarim", href: "/my-schedule", roles: ["student"] },
     {
-      label: "💬 Xabarlar",
+      label: "� Dars Jadvalı",
+      href: "/calendar",
+      roles: ["admin", "teacher"],
+    },
+    {
+      label: "�💬 Xabarlar",
       href: "/messages",
       roles: ["admin", "teacher", "student"],
     },
@@ -52,14 +57,34 @@ export default function Sidebar({ role }) {
 
       {/* User Profile */}
       {user && (
-        <div className="mb-6 p-3 bg-gray-700 rounded-lg border border-gray-600">
-          <p className="text-sm font-semibold text-blue-300">{user.email}</p>
-          <p className="text-xs text-gray-400 mt-1">
-            Rol:{" "}
-            <span className="text-green-400 font-bold">
-              {role || "Foydalanuvchi"}
-            </span>
-          </p>
+        <div className="mb-6 p-4 bg-gradient-to-r from-gray-700 to-gray-600 rounded-lg border border-gray-500 hover:border-blue-400 transition-colors">
+          <div className="flex items-center gap-3">
+            {/* Avatar */}
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white text-lg flex-shrink-0 overflow-hidden border-2 border-blue-300">
+              {user.avatar && user.avatar.startsWith("data:") ? (
+                <img
+                  src={user.avatar}
+                  alt="avatar"
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+              ) : (
+                <span>{user.avatar || "👤"}</span>
+              )}
+            </div>
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-white truncate">
+                {user.fullName}
+              </p>
+              <p className="text-xs text-gray-300 mt-0.5">
+                <span className="bg-green-600 text-green-100 px-2 py-0.5 rounded-full inline-block font-semibold text-xs">
+                  {role === "admin" && "👨‍💼 Admin"}
+                  {role === "teacher" && "👨‍🏫 O'qituvchi"}
+                  {role === "student" && "👨‍🎓 Talaba"}
+                </span>
+              </p>
+            </div>
+          </div>
         </div>
       )}
 

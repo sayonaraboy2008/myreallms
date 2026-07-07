@@ -5,6 +5,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import CourseList from "./components/CourseList";
 import StudentList from "./components/StudentList";
 import StudentStats from "./components/StudentStats";
+import TeacherCourses from "./components/TeacherCourses";
+import Settings from "./components/Settings";
+import LessonCalendar from "./components/LessonCalendar";
 function App() {
   return (
     <BrowserRouter>
@@ -22,7 +25,17 @@ function App() {
         >
           {/* Dashboard ichidagi sahifalar */}
           <Route path="courses" element={<CourseList />} />
-          Kelajakda: <Route path="students" element={<StudentList />} />
+          <Route path="students" element={<StudentList />} />
+          <Route path="teacher-courses" element={<TeacherCourses />} />
+          <Route
+            path="calendar"
+            element={
+              <LessonCalendar
+                role={JSON.parse(localStorage.getItem("user"))?.role}
+              />
+            }
+          />
+          <Route path="settings" element={<Settings />} />
           <Route index element={<StudentStats />} />
         </Route>
       </Routes>
