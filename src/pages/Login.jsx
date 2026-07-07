@@ -20,6 +20,7 @@ function Login() {
 
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("isLoggedIn", "true");
       navigate("/");
       window.location.reload(); // Majburiy yangilash
     } else {

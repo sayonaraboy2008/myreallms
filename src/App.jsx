@@ -4,6 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import CourseList from "./components/CourseList";
 import StudentList from "./components/StudentList";
+import StudentStats from "./components/StudentStats";
 function App() {
   return (
     <BrowserRouter>
@@ -22,7 +23,7 @@ function App() {
           {/* Dashboard ichidagi sahifalar */}
           <Route path="courses" element={<CourseList />} />
           Kelajakda: <Route path="students" element={<StudentList />} />
-          <Route index element={<Navigate to="courses" />} />
+          <Route index element={<StudentStats />} />
         </Route>
       </Routes>
     </BrowserRouter>
