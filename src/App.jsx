@@ -24,11 +24,11 @@ function App() {
           }
         >
           {/* Dashboard ichidagi sahifalar */}
-          <Route path="courses" element={<CourseList />} />
-          <Route path="students" element={<StudentList />} />
-          <Route path="teacher-courses" element={<TeacherCourses />} />
+          <Route path="/courses" element={<CourseList />} />
+          <Route path="/students" element={<StudentList />} />
+          <Route path="/teacher-courses" element={<TeacherCourses />} />
           <Route
-            path="calendar"
+            path="/calendar"
             element={
               <LessonCalendar
                 role={JSON.parse(localStorage.getItem("user"))?.role}
